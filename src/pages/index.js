@@ -113,9 +113,11 @@ class BlogIndex extends React.Component {
               <PostPreview post={node} key={node.fields.slug} />
             ))}
 
-            <Link to="/blog" tabindex="-1">
-              <Button>View All</Button>
-            </Link>
+            {posts.length ? (
+              <Link to="/blog" tabindex="-1">
+                <Button>View All</Button>
+              </Link>
+            ) : null}
           </Main>
         </Wrapper>
       </Centered>
