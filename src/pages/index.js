@@ -76,7 +76,9 @@ const SocialLink = styled.a`
 class BlogIndex extends React.Component {
   render() {
     const { data } = this.props
-    const posts = data.allMarkdownRemark.edges
+    const posts = data.allMarkdownRemark.edges.filter(
+      node => node.node.frontmatter.title !== 'Placeholder'
+    )
 
     const links = data.site.siteMetadata.links
     console.log(BoxStyle(5))

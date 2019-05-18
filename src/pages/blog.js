@@ -18,8 +18,9 @@ const PageTitle = styled.h2`
 class Blog extends React.Component {
   render() {
     const siteTitle = this.props.data.site.siteMetadata.title
-    const posts = this.props.data.allMarkdownRemark.edges
-    console.log(this.props.data)
+    const posts = this.props.data.allMarkdownRemark.edges.filter(
+      node => node.node.frontmatter.title !== 'Placeholder'
+    )
 
     return (
       <Container>
@@ -29,6 +30,7 @@ class Blog extends React.Component {
         {posts.map(({ node }) => (
           <PostPreview post={node} />
         ))}
+        {posts.length ? null : <h4>There's nothing here yet.</h4>}
       </Container>
     )
   }
