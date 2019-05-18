@@ -1,12 +1,22 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Starter Blog`,
-    author: `Kyle Mathews`,
-    description: `A starter blog demonstrating what Gatsby can do.`,
-    siteUrl: `https://gatsby-starter-blog-demo.netlify.com/`,
+    title: `Ian J Sikes`,
+    author: `Ian J Sikes`,
+    description: `web / mobile / game developer`,
+    siteUrl: `https://ianjsikes.com/`,
     social: {
-      twitter: `kylemathews`,
+      twitter: `ianjsikes`,
     },
+    links: [
+      { title: 'GitHub', link: 'https://github.com/ianjsikes' },
+      { title: 'LinkedIn', link: 'https://linkedin.com/in/ianjsikes' },
+      { title: 'Medium', link: 'https://medium.com/@ianjsikes' },
+      { title: 'Twitter', link: 'https://twitter.com/ianjsikes' },
+      {
+        title: 'Résumé',
+        link: 'resume_ian_sikes.pdf',
+      },
+    ],
   },
   plugins: [
     {
@@ -57,22 +67,17 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Gatsby Starter Blog`,
-        short_name: `GatsbyJS`,
+        name: `Ian J Sikes`,
+        short_name: `IJS`,
         start_url: `/`,
         background_color: `#ffffff`,
-        theme_color: `#663399`,
+        theme_color: `#000000`,
         display: `minimal-ui`,
-        icon: `content/assets/gatsby-icon.png`,
+        icon: `src/images/icon.svg`,
       },
     },
     `gatsby-plugin-offline`,
     `gatsby-plugin-react-helmet`,
-    {
-      resolve: `gatsby-plugin-typography`,
-      options: {
-        pathToConfigModule: `src/utils/typography`,
-      },
-    },
+    `gatsby-plugin-styled-components`,
   ],
 }
