@@ -26,6 +26,14 @@ module.exports = {
         name: `blog`,
       },
     },
+    `gatsby-transformer-yaml`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        path: `${__dirname}/content/themes/`,
+        name: `themes`,
+      },
+    },
     {
       resolve: `gatsby-source-filesystem`,
       options: {

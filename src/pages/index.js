@@ -76,9 +76,7 @@ const SocialLink = styled.a`
 class BlogIndex extends React.Component {
   render() {
     const { data } = this.props
-    const posts = data.allMarkdownRemark.edges.filter(
-      node => node.node.frontmatter.title !== 'Placeholder'
-    )
+    const posts = data.allMarkdownRemark.edges
 
     const links = data.site.siteMetadata.links
     console.log(BoxStyle(5))
@@ -115,7 +113,7 @@ class BlogIndex extends React.Component {
               <PostPreview post={node} key={node.fields.slug} />
             ))}
 
-            {posts.length ? (
+            {posts.length > 3 ? (
               <Link to="/blog" tabindex="-1">
                 <Button>View All</Button>
               </Link>

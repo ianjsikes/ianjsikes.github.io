@@ -18,9 +18,7 @@ const PageTitle = styled.h2`
 class Blog extends React.Component {
   render() {
     const siteTitle = this.props.data.site.siteMetadata.title
-    const posts = this.props.data.allMarkdownRemark.edges.filter(
-      node => node.node.frontmatter.title !== 'Placeholder'
-    )
+    const posts = this.props.data.allMarkdownRemark.edges
 
     return (
       <Container>

@@ -3,6 +3,7 @@ import { Link, graphql } from 'gatsby'
 import styled from 'styled-components'
 
 import SEO from '../components/seo'
+import SyntaxHighlighter from '../components/syntax-highlighter'
 
 const Container = styled.div`
   margin: 3rem auto;
@@ -25,6 +26,7 @@ class BlogPostTemplate extends React.Component {
 
     return (
       <Container>
+        <SyntaxHighlighter themeName="Atelier Sulphurpool Light" />
         <SEO
           title={post.frontmatter.title}
           description={post.frontmatter.description || post.excerpt}
