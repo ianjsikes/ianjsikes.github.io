@@ -1,1 +1,218 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Ian J Sikes]]></title><description><![CDATA[web / mobile / game developer]]></description><link>https://ianjsikes.com/</link><generator>RSS for Node</generator><lastBuildDate>Fri, 24 May 2019 02:15:18 GMT</lastBuildDate><item><title><![CDATA[Placeholder]]></title><description><![CDATA[This is a placeholder blog post. Hopefully nobody sees this.]]></description><link>https://ianjsikes.com//placeholder-post/</link><guid isPermaLink="false">https://ianjsikes.com//placeholder-post/</guid><pubDate>Fri, 01 May 2015 22:12:03 GMT</pubDate><content:encoded>&lt;p&gt;This is a placeholder blog post. Hopefully nobody sees this.&lt;/p&gt;</content:encoded></item></channel></rss>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Ian J Sikes]]></title><description><![CDATA[web / mobile / game developer]]></description><link>https://ianjsikes.com/</link><generator>RSS for Node</generator><lastBuildDate>Sat, 01 Jun 2019 23:15:46 GMT</lastBuildDate><item><title><![CDATA[Get Started with Rust, WebAssembly, and Webpack]]></title><description><![CDATA[UPDATE!The Rust Compiler now has native support for compilation to WebAssembly without Emscripten! Most of the info in this post is no…]]></description><link>https://ianjsikes.com//get-started-with-rust-wasm/</link><guid isPermaLink="false">https://ianjsikes.com//get-started-with-rust-wasm/</guid><pubDate>Thu, 22 Jun 2017 22:12:03 GMT</pubDate><content:encoded>&lt;blockquote&gt;
+&lt;h2&gt;UPDATE!&lt;/h2&gt;
+&lt;p&gt;The Rust Compiler now has native support for compilation to WebAssembly without Emscripten! Most of the info in this post is &lt;strong&gt;no longer relevant&lt;/strong&gt;. For an &lt;em&gt;amazing&lt;/em&gt; and up-to-date resource on Rust and WebAssembly, check out the &lt;a href=&quot;https://rustwasm.github.io/docs/book/&quot;&gt;Rust and WebAssembly Book&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I’ve been seeing a lot of really cool &lt;a href=&quot;https://twitter.com/search?q=%23wasm&amp;#x26;src=typd&quot;&gt;#wasm&lt;/a&gt; &lt;em&gt;(WebAssembly)&lt;/em&gt; stuff on &lt;a href=&quot;https://twitter.com/jose_pedro_dias/status/876592025881251840&quot;&gt;Twitter&lt;/a&gt; and &lt;a href=&quot;https://news.ycombinator.com/item?id=14341623&quot;&gt;Hacker News&lt;/a&gt; lately, but I didn’t know much about what it is exactly, or how to start using it. Because it is so new — only being enabled in Chrome last March — up-to-date guides are few and far between. After struggling through getting something to run, here’s what I’ve learned:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://webassembly.org/&quot;&gt;WebAssembly&lt;/a&gt; is a &lt;em&gt;cool new binary format&lt;/em&gt; and compile target for the web. That means you can compile languages like C, C++, and Rust to .wasm files and execute that code in your browser. In most cases, the resulting code is significantly &lt;a href=&quot;https://hacks.mozilla.org/2017/03/why-webassembly-is-faster-than-asm-js/&quot;&gt;faster &lt;em&gt;and&lt;/em&gt; smaller&lt;/a&gt; than Javascript.&lt;/p&gt;
+&lt;p&gt;This guide will walk you through setting up Rust, WebAssembly, and Webpack in a typical JS web app. The goal is to be able to execute low-level Rust code in the browser alongside the Javascript you know and love &lt;em&gt;(or hate)&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;Note:&lt;/em&gt;&lt;/strong&gt; These technologies are constantly changing. This guide is using:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;webpack 3.0.0&lt;/li&gt;
+&lt;li&gt;cargo 0.19.0&lt;/li&gt;
+&lt;li&gt;emcc 1.37.13&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/ianjsikes/rust-wasm-webpack-tutorial&quot;&gt;Here is the finished project&lt;/a&gt;. If you run into a problem, let me know with an &lt;a href=&quot;https://github.com/ianjsikes/rust-wasm-webpack-tutorial/issues/new&quot;&gt;issue&lt;/a&gt; or &lt;a href=&quot;https://github.com/ianjsikes/rust-wasm-webpack-tutorial/compare&quot;&gt;PR&lt;/a&gt; 😊.&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/f205f2ceb5011e554c08cd43087b4d81/a296c/wasm-logo.jpg&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 50.74999999999999%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/jpeg;base64,/9j/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wgARCAAKABQDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAQCAwX/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAv/aAAwDAQACEAMQAAAB2Fo32bFiH//EABkQAAMAAwAAAAAAAAAAAAAAAAECAwAQEf/aAAgBAQABBQK47KCFaYp3/8QAFBEBAAAAAAAAAAAAAAAAAAAAEP/aAAgBAwEBPwE//8QAFxEAAwEAAAAAAAAAAAAAAAAAAQIREP/aAAgBAgEBPwEPBM//xAAaEAEAAgMBAAAAAAAAAAAAAAABABARITFB/9oACAEBAAY/AkJnfPSiif/EABwQAQACAgMBAAAAAAAAAAAAAAEAESFxEDFBof/aAAgBAQABPyFDirWDcUK/S6OGvJiv2eaT/9oADAMBAAIAAwAAABADD//EABQRAQAAAAAAAAAAAAAAAAAAABD/2gAIAQMBAT8QP//EABYRAQEBAAAAAAAAAAAAAAAAAAEQUf/aAAgBAgEBPxBF3P/EABsQAQACAwEBAAAAAAAAAAAAAAERMQAhQRBh/9oACAEBAAE/ENdlASumNyC5Doi/Plp7kA20LyW5pn//2Q==&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;WASM Logo&quot;
+        title=&quot;&quot;
+        src=&quot;/static/f205f2ceb5011e554c08cd43087b4d81/c739e/wasm-logo.jpg&quot;
+        srcset=&quot;/static/f205f2ceb5011e554c08cd43087b4d81/8ee9c/wasm-logo.jpg 148w,
+/static/f205f2ceb5011e554c08cd43087b4d81/ebbe7/wasm-logo.jpg 295w,
+/static/f205f2ceb5011e554c08cd43087b4d81/c739e/wasm-logo.jpg 590w,
+/static/f205f2ceb5011e554c08cd43087b4d81/a296c/wasm-logo.jpg 800w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;h3&gt;What you will need&lt;/h3&gt;
+&lt;p&gt;Follow these links to install:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://nodejs.org/en/download/&quot;&gt;Node&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://www.rust-lang.org/en-US/install.html&quot;&gt;Rust&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Install the Emscripten Rust compiler&lt;/h3&gt;
+&lt;p&gt;Install the WebAssembly &lt;a href=&quot;http://kripken.github.io/emscripten-site/&quot;&gt;Emscripten&lt;/a&gt; compile target for Rust:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;$ rustup target &lt;span class=&quot;token function&quot;&gt;add&lt;/span&gt; wasm32-unknown-emscripten&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Install &lt;a href=&quot;https://cmake.org&quot;&gt;cmake&lt;/a&gt;. This varies depending on your platform, choose the option right for you or see the &lt;a href=&quot;https://cmake.org/install/&quot;&gt;install page&lt;/a&gt; for more options:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;$ brew &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; cmake                  &lt;span class=&quot;token comment&quot;&gt;# MacOS, brew&lt;/span&gt;
+$ &lt;span class=&quot;token function&quot;&gt;sudo&lt;/span&gt; port &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; cmake             &lt;span class=&quot;token comment&quot;&gt;# MacOS, MacPorts&lt;/span&gt;
+$ &lt;span class=&quot;token function&quot;&gt;sudo&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;apt-get&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; cmake          &lt;span class=&quot;token comment&quot;&gt;# Debian Linux&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Install the Emscripten SDK. This is going to take a while (&lt;em&gt;~2 hours for me&lt;/em&gt;).&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: If ./emsdk update or ./emsdk install give you errors, it may be that Python3 is your default Python. Try installing Python 2.7 and replacing ./emsdk … with python2.7 emsdk …&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;$ &lt;span class=&quot;token function&quot;&gt;cd&lt;/span&gt; ~
+$ &lt;span class=&quot;token function&quot;&gt;wget&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+$ &lt;span class=&quot;token function&quot;&gt;tar&lt;/span&gt; -xvf emsdk-portable.tar.gz
+$ &lt;span class=&quot;token function&quot;&gt;cd&lt;/span&gt; emsdk-portable
+$ ./emsdk update
+$ ./emsdk &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; sdk-incoming-64bit&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;img src=&quot;https://imgs.xkcd.com/comics/compiling.png&quot; alt=&quot;https://xkcd.com/303/&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://xkcd.com/303/&quot;&gt;&lt;em&gt;https://xkcd.com/303/&lt;/em&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Next, we’ll need to add the following directories to our PATH environment variable:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;text&quot;&gt;&lt;pre class=&quot;language-text&quot;&gt;&lt;code class=&quot;language-text&quot;&gt;~/emsdk-portable
+~/emsdk-portable/clang/fastcomp/build_incoming_64/bin
+~/emsdk-portable/emscripten/incoming&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Reload the terminal, then run emcc -v to check that the Emscripten compiler is installed.&lt;/p&gt;
+&lt;h3&gt;Compile and load Rust with Webpack&lt;/h3&gt;
+&lt;p&gt;Let’s create a Rust/Javascript hybrid project:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;cargo new tutorial --bin --vcs none
+&lt;span class=&quot;token function&quot;&gt;cd&lt;/span&gt; tutorial
+&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; init        &lt;span class=&quot;token comment&quot;&gt;# You can just hit enter for every option&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;We need to install &lt;a href=&quot;https://webpack.js.org/&quot;&gt;webpack&lt;/a&gt;, &lt;a href=&quot;https://www.npmjs.com/package/http-server&quot;&gt;http-server&lt;/a&gt; to serve our content, and &lt;a href=&quot;https://www.npmjs.com/package/rust-wasm-loader&quot;&gt;rust-wasm-loader&lt;/a&gt; to compile and load Rust code as .wasm modules.&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;install&lt;/span&gt; --save-dev webpack
+http-server rust-wasm-loader&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Add a few helpful scripts to our package.json:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;json&quot;&gt;&lt;pre class=&quot;language-json&quot;&gt;&lt;code class=&quot;language-json&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token property&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;compile&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;webpack --progress&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token property&quot;&gt;&quot;serve&quot;&lt;/span&gt;&lt;span class=&quot;token operator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&quot;http-server&quot;&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create an index.html:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;html&quot;&gt;&lt;pre class=&quot;language-html&quot;&gt;&lt;code class=&quot;language-html&quot;&gt;&lt;span class=&quot;token doctype&quot;&gt;&amp;lt;!DOCTYPE html&gt;&lt;/span&gt;
+&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;html&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;head&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;title&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;Hello World&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;title&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;head&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;body&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;div&lt;/span&gt; &lt;span class=&quot;token attr-name&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;token attr-value&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&quot;&lt;/span&gt;container&lt;span class=&quot;token punctuation&quot;&gt;&quot;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;div&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+    &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;&lt;/span&gt;script&lt;/span&gt; &lt;span class=&quot;token attr-name&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;token attr-value&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&quot;&lt;/span&gt;build/bundle.js&lt;span class=&quot;token punctuation&quot;&gt;&quot;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;token script&quot;&gt;&lt;/span&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;script&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;body&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token tag&quot;&gt;&lt;span class=&quot;token punctuation&quot;&gt;&amp;lt;/&lt;/span&gt;html&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create a webpack.config.js:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;js&quot;&gt;&lt;pre class=&quot;language-js&quot;&gt;&lt;code class=&quot;language-js&quot;&gt;module&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;exports &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  entry&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;./src/index.js&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  output&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    filename&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;bundle.js&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    path&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; __dirname &lt;span class=&quot;token operator&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;/build&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  module&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    rules&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;
+      &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+        test&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token regex&quot;&gt;/\.rs$/&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+        use&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+          loader&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;rust-wasm-loader&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+          options&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;token comment&quot;&gt;// The path to the webpack output relative to the project root&lt;/span&gt;
+            path&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;build&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;token comment&quot;&gt;// The .wasm &apos;glue&apos; code generated by Emscripten requires these node builtins,&lt;/span&gt;
+  &lt;span class=&quot;token comment&quot;&gt;// but won&apos;t actually use them in a web environment. We tell Webpack to not resolve those&lt;/span&gt;
+  &lt;span class=&quot;token comment&quot;&gt;// require statements since we know we won&apos;t need them.&lt;/span&gt;
+  externals&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    fs&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+    path&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Let’s add a function to our src/main.rs that we will call from Javascript:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;rust&quot;&gt;&lt;pre class=&quot;language-rust&quot;&gt;&lt;code class=&quot;language-rust&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token function&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&quot;Hello, world!&quot;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;token comment&quot;&gt;// Functions that you wish to access from Javascript&lt;/span&gt;
+&lt;span class=&quot;token comment&quot;&gt;// must be marked as no_mangle&lt;/span&gt;
+&lt;span class=&quot;token attribute attr-name&quot;&gt;#[no_mangle]&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;pub&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; i32&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; b&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; i32&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;-&gt;&lt;/span&gt; i32 &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;token keyword&quot;&gt;return&lt;/span&gt; a &lt;span class=&quot;token operator&quot;&gt;+&lt;/span&gt; b
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Finally, we’ll write some code in src/index.js to load and use the WebAssembly module:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;js&quot;&gt;&lt;pre class=&quot;language-js&quot;&gt;&lt;code class=&quot;language-js&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;const&lt;/span&gt; wasm &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;token function&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;./main.rs&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+wasm&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt; noExitRuntime&lt;span class=&quot;token punctuation&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;token boolean&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token parameter&quot;&gt;module&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&gt;&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;token comment&quot;&gt;// Create a Javascript wrapper around our Rust function&lt;/span&gt;
+  &lt;span class=&quot;token keyword&quot;&gt;const&lt;/span&gt; add &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; module&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;cwrap&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;add&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;number&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token punctuation&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;number&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token string&quot;&gt;&apos;number&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+  console&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token string&quot;&gt;&apos;Calling rust functions from javascript!&apos;&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+  console&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token function&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token number&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;token number&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;token punctuation&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Run these commands to compile and serve the project:&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;bash&quot;&gt;&lt;pre class=&quot;language-bash&quot;&gt;&lt;code class=&quot;language-bash&quot;&gt;$ &lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; run compile
+$ &lt;span class=&quot;token function&quot;&gt;npm&lt;/span&gt; run serve&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Navigate the browser to localhost:8080, open the Javascript console, and rest your weary eyes on the glorious output of our WebAssembly compiled Rust code!&lt;/p&gt;
+&lt;p&gt;
+  &lt;a
+    class=&quot;gatsby-resp-image-link&quot;
+    href=&quot;/static/b69d09c2d56a7235c099de588823abf7/daaee/wasm-console.png&quot;
+    style=&quot;display: block&quot;
+    target=&quot;_blank&quot;
+    rel=&quot;noopener&quot;
+  &gt;
+  
+  &lt;span
+    class=&quot;gatsby-resp-image-wrapper&quot;
+    style=&quot;position: relative; display: block;  max-width: 590px; margin-left: auto; margin-right: auto;&quot;
+  &gt;
+    &lt;span
+      class=&quot;gatsby-resp-image-background-image&quot;
+      style=&quot;padding-bottom: 47.153284671532845%; position: relative; bottom: 0; left: 0; background-image: url(&apos;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAJCAIAAAC9o5sfAAAACXBIWXMAAAsSAAALEgHS3X78AAABp0lEQVQoz2Pw9Ulx9E52CcjyjijyDC3wCs13842yd/aztPXQM7YFIl0jax1DKAKyIVxdIxtTKxeGoIwZASkTvJMmOEX1OEZ224e16Zq4yClqySrpyCnpyKvoaeiYa+lbaepZahtYa+haqutYauiaq+uYe/tHMGTnl4dHJcQmpAJReFSsX1AYEAUER/gHRwDJ0Mj4nILKkoqGvOKasqqm7OK6jPzqnPzKzLzywtI6hv8UAIb2rgmt7T3TF+2au/pMS3tfcxsIdXRNau3ob++a2NTa2941qbtvcmNrZ3fPpM7uie1dfR2dQKl+oC4GbQMbXXN/Y5dUM+9CfQs/Y2s/Q1N/Q5twHYsQPctgQ7sIXcsgVV0LZU1TeRV9eVVdORU9GWUdCVkVcRkVhsjYdDd3L28vL09PTzcPf3cPP2c3fwfXACCydQ6wdQkEkjZO/kDS2tHX2tHP1ifWxifG283b08WbITg8ydbe3dHVx94ZiLztnLyBpKOLl4Ozt7WDj6W9j5UDEPnCkbVnlJVnlKert4ezJ4OFnZeJlYeJNRSZghGIbQVimOFFAEWZzzFV+/tZAAAAAElFTkSuQmCC&apos;); background-size: cover; display: block;&quot;
+    &gt;
+      &lt;img
+        class=&quot;gatsby-resp-image-image&quot;
+        style=&quot;width: 100%; height: 100%; margin: 0; vertical-align: middle; position: absolute; top: 0; left: 0; box-shadow: inset 0px 0px 0px 400px white;&quot;
+        alt=&quot;It’s happening!&quot;
+        title=&quot;&quot;
+        src=&quot;/static/b69d09c2d56a7235c099de588823abf7/b9e4f/wasm-console.png&quot;
+        srcset=&quot;/static/b69d09c2d56a7235c099de588823abf7/cf440/wasm-console.png 148w,
+/static/b69d09c2d56a7235c099de588823abf7/d2d38/wasm-console.png 295w,
+/static/b69d09c2d56a7235c099de588823abf7/b9e4f/wasm-console.png 590w,
+/static/b69d09c2d56a7235c099de588823abf7/daaee/wasm-console.png 685w&quot;
+        sizes=&quot;(max-width: 590px) 100vw, 590px&quot;
+      /&gt;
+    &lt;/span&gt;
+  &lt;/span&gt;
+  
+  &lt;/a&gt;
+    &lt;/p&gt;
+&lt;p&gt;&lt;em&gt;It’s happening!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;We did it!&lt;/strong&gt; &lt;a href=&quot;https://github.com/ianjsikes/rust-wasm-webpack-tutorial&quot;&gt;Here is the finished project&lt;/a&gt;. I hope this tutorial helps you explore the &lt;em&gt;exciting new world of WebAssembly&lt;/em&gt;. Below are some resources that I’ve found useful. Contact me on &lt;a href=&quot;https://twitter.com/ianjsikes&quot;&gt;Twitter&lt;/a&gt; if you have any questions/comments/feedback/hate-mail.&lt;/p&gt;
+&lt;h3&gt;Resources&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.hellorust.com/emscripten/&quot;&gt;Compiling Rust to your Browser&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://kripken.github.io/emscripten-site/docs/index.html&quot;&gt;Emscripten Docs&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;http://asquera.de/blog/2017-04-10/the-path-to-rust-on-the-web/&quot;&gt;The Path to Rust on the Web&lt;/a&gt; — This post has more in-depth usage examples.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://crates.io/crates/webplatform&quot;&gt;webplatform&lt;/a&gt; — A Rust crate for interacting with the DOM.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/WebAssembly&quot;&gt;WebAssembly — MDN&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://users.rust-lang.org/t/compiling-to-the-web-with-rust-and-emscripten/7627&quot;&gt;Compiling to the web with Rust and emscripten&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/mrdziuban/rust-emscripten-loader&quot;&gt;mrdziuban/rust-emscripten-loader&lt;/a&gt; — &lt;a href=&quot;https://www.npmjs.com/package/rust-wasm-loader&quot;&gt;rust-wasm-loader&lt;/a&gt; is a fork of this awesome project with small changes to the way modules are initialized. Check this loader out if you want the flexibility of choosing between asm.js and WebAssembly targets.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</content:encoded></item></channel></rss>
